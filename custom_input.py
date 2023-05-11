@@ -2,6 +2,7 @@
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import pickle
+import numpy as np
 
 # Load the tokenizer
 with open('tokenizer.pkl', 'rb') as f:
