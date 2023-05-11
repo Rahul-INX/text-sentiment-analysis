@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Recognition</title>
+</head>
+<body>
+    <h1>Emotion Recognition</h1>
+    <form method="POST" action="/">
+        <input type="text" name="text" placeholder="Enter your text" required>
+        <button type="submit">Submit</button>
+    </form>
+    {% if emotion %}
+        <h2>Predicted Emotion: {{ emotion }}</h2>
+    {% endif %}
+</body>
+</html>
