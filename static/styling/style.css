@@ -121,6 +121,17 @@ textarea {
   text-decoration: none;
 }
 
+.clear-button {
+  color: #fff;
+  background-color: red;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px; /* Add border-radius property */
+}
+
+
+
 /* Adjustments for Mobile */
 @media (max-width: 480px) {
   body {

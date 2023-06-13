@@ -168,6 +168,7 @@ def index():
         history.insert(0, entry)
         save_history(history)
         return redirect('/')
+        
     
     return render_template('index.html', history=history, inferred_emotions=inferred_emotions, threshold=session.get('threshold', 0.5), random_string=random_string)
 
@@ -183,7 +184,6 @@ def set_threshold():
     threshold = float(request.form['threshold'])
     session['threshold'] = threshold  # Update the threshold value in the session
     return redirect('/')
-
 
 
 @app.route('/random', methods=['POST'])
