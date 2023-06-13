@@ -19,6 +19,7 @@ Session(app)
 # Load the tokenizer
 with open('tokenizer.pkl', 'rb') as f:
     tokenizer = pickle.load(f)
+threshold = 0.5
 
 # Load the emotion trained model
 model = tf.keras.models.load_model('emotion_model_trained.h5')
@@ -50,6 +51,8 @@ def predict_emotion(text):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get the current timestamp
 
     return top_emotions, top_probabilities, timestamp  # Return emotions, probabilities, and timestamp
+
+random_string = ""
 
 def save_history(history):
     with open('history.json', 'w') as f:
@@ -132,7 +135,6 @@ def predict_inferred_emotions(emotions, probabilities, threshold):
     # Remove atomic emotions from inferred emotions if its size is greater than 3
     if len(inferred_emotions) > 3:
         inferred_emotions = [emotion for emotion in inferred_emotions if emotion not in ('anger', 'fear', 'sadness', 'surprise', 'joy', 'love')]
-
     print("THRESHOLD:", threshold)
     print("FILTERED EMOTION:", filtered_emotions)
     print("INFERRED EMOTION:", inferred_emotions)
@@ -147,14 +149,10 @@ def get_random_string():
 
 history = load_history()
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     inferred_emotions = []
-    
-    if 'threshold' in session:
-        threshold = session['threshold']  # Get the threshold value from the session
-
-    random_string = session.pop('random_string', '')  # Get and remove the random_string value from the session or assign an empty string
 
     if request.method == 'POST':
         text = request.form['text']
@@ -171,9 +169,7 @@ def index():
         save_history(history)
         return redirect('/')
     
-    return render_template('index.html', history=history, inferred_emotions=inferred_emotions, threshold=threshold, random_string=random_string)
-
-
+    return render_template('index.html', history=history, inferred_emotions=inferred_emotions, threshold=session.get('threshold', 0.5), random_string=random_string)
 
 @app.route('/clear', methods=['POST'])
 def clear_history():
@@ -183,15 +179,19 @@ def clear_history():
 
 @app.route('/set_threshold', methods=['POST'])
 def set_threshold():
+    global threshold  # Declare the threshold variable as global
     threshold = float(request.form['threshold'])
     session['threshold'] = threshold  # Update the threshold value in the session
     return redirect('/')
+
+
+
 @app.route('/random', methods=['POST'])
 def random_text():
+    global random_string
     random_string = get_random_string()
-    session['random_string'] = random_string
     return redirect('/')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
+

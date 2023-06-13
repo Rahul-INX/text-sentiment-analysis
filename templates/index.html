@@ -62,13 +62,14 @@
         <input type="submit" value="Random">
     </form>
 
-    <form id="input-form" method="POST" action="/">
+    <form id="input-form" method="POST" action="/set_threshold">
         <div style="display: flex; align-items: center;">
             <label for="threshold" style="margin-right: 5px;">Inference Threshold :</label>
             <input type="number" name="threshold" id="threshold" step="0.01" min="0" max="1" value="{{ threshold }}" style="margin-right: 5px;">
-            <button type="button" id="set-button">Set</button>
+            <button type="submit">Set</button>
         </div>
     </form>
+    
 
     {% if inferred_emotions %}
     <h3>Inferred Emotions:</h3>
