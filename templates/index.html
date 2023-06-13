@@ -1,97 +1,160 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Emotion Detection</title>
     <link rel="stylesheet" href="static\styling\style.css">
-    <title>Emotion Recognition</title>
     <style>
-        .history {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            height: 200px;
-            overflow: auto;
+        .result-textarea {
+            width: 100%;
+            height: 300px;
+            resize: vertical;
+            overflow-y: auto;
         }
-        table {
+
+        .result-table {
             width: 100%;
             border-collapse: collapse;
         }
-        th, td {
+
+        .result-table th,
+        .result-table td {
             padding: 8px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
-        .clear-btn {
-            margin-top: 10px;
-        }
-        .emoji {
-            font-size: 20px;
-            margin-left: 5px;
-        }
-        .warning {
-            font-size: 24px;
+
+        .low-confidence {
             color: red;
+        }
+
+        .medium-confidence {
+            color: orange;
+        }
+
+        .high-confidence {
+            color: green;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .result-textarea {
+                height: 200px;
+            }
+
+            .result-table th,
+            .result-table td {
+                padding: 5px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Emotion Recognition</h1>
-    <form method="POST" action="/"  style="text-align: center;">
-        <input type="text" name="text" placeholder="Enter your text" required>
-        <button type="submit">Submit</button>
+    <h1>Emotion Detection</h1>
+
+    <form id="input-form" method="POST" action="/">
+        <div style="display: flex; flex-wrap: wrap;">
+            <textarea name="text" id="input-textarea" style="width: 100%; resize: none;" required placeholder="Enter your text here">{{ random_string }}</textarea>
+            <input type="submit" value="Submit" style="width: 100%; margin-top: 10px;">
+        </div>
     </form>
-    
-    <div class="history">
-        <h2>History:</h2>
-        <table>
+
+    <form method="POST" action="/random">
+        <input type="submit" value="Random">
+    </form>
+
+    <form id="input-form" method="POST" action="/">
+        <div style="display: flex; align-items: center;">
+            <label for="threshold" style="margin-right: 5px;">Inference Threshold :</label>
+            <input type="number" name="threshold" id="threshold" step="0.01" min="0" max="1" value="{{ threshold }}" style="margin-right: 5px;">
+            <button type="button" id="set-button">Set</button>
+        </div>
+    </form>
+
+    {% if inferred_emotions %}
+    <h3>Inferred Emotions:</h3>
+    <ul>
+        {% for emotion in inferred_emotions %}
+        <li>{{ emotion }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>Result History</h2>
+    <div class="result-textarea">
+        <table class="result-table">
             <thead>
                 <tr>
-                    <th>Input Text</th>
-                    <th>Emotion Recognized</th>
+                    <th>Text</th>
+                    <th>Emotion &amp; Probs</th>
+                    <th>Inferred Emotions</th>
+                    <th>Confidence</th>
                     <th>Timestamp</th>
                 </tr>
             </thead>
             <tbody>
                 {% for entry in history %}
-                    <tr>
-                        <td>{{ entry.text }}</td>
-                        <td>{{ entry.emotion }}{% if entry.emotion == 'anger' %}😠{% elif entry.emotion == 'fear' %}😨{% elif entry.emotion == 'sadness' %}😢{% elif entry.emotion == 'surprise' %}😮{% elif entry.emotion == 'joy' %}🥳{% elif entry.emotion == 'love' %}❤️{% endif %}</td>
-                        <td>{{ entry.timestamp }}</td>
-                    </tr>
+                <tr>
+                    <td>{{ entry['text'] }}</td>
+                    <td>
+                        {% for i in range(3) %}
+                        {% set emotion = entry['emotions'][i] %}
+                        {% set probability = entry['probabilities'][i] %}
+                        {{ emotion }}: {{ '%.3f' % probability }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for inferred_emotion in entry['inferred_emotions'] %}
+                        {{ inferred_emotion }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="{% if entry['probabilities']|max < 0.5 %}low-confidence
+                    {% elif entry['probabilities']|max > 0.7 %}high-confidence
+                    {% else %}medium-confidence{% endif %}">
+                        {% if entry['probabilities']|max < 0.5 %}Low
+                        {% elif entry['probabilities']|max > 0.7 %}High
+                        {% else %}Medium{% endif %}
+                    </td>
+                    <td>{{ entry['timestamp'] }}</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-    
-    <form method="POST" action="/clear" class="clear-btn">
-        <button type="submit">Clear History</button>
+
+    <form method="POST" action="/clear">
+        <input type="submit" value="Clear History">
     </form>
-    
-    {% if emotion %}
-        <h2>Predicted Emotion: {{ emotion }}{% if emotion == 'anger' %}😠{% elif emotion == 'fear' %}😨{% elif emotion == 'sadness' %}😢{% elif emotion == 'surprise' %}😮{% elif emotion == 'joy' %}🥳{% elif emotion == 'love' %}❤️{% endif %}</h2>
-    {% endif %}
 
-    {% if depression_warning %}
-    <div style="text-align: center;">
-        <p class="warning">Depression Detected! Danger! ⚠️</p>
-    </div>    
-    {% endif %}
+    <footer class="footer">
+        <div class="footer-text">
+            Developed by: Jathin Rahul Sarath |
+            <a href="https://github.com/Rahul-INX/text-sentiment-analysis">GitHub</a>
+        </div>
+    </footer>
 
-    <!-- Rest of the HTML code... -->
+    <script>
+        var inputForm = document.getElementById('input-form');
+        var inputTextarea = document.getElementById('input-textarea');
+        var thresholdInput = document.getElementById('threshold');
+        var setButton = document.getElementById('set-button');
 
-<form method="POST" action="/set_threshold" class="threshold-form">
-    <label for="threshold">Threshold:</label>
-    <input type="number" name="threshold" id="threshold" value="{{ threshold }}" min="1" max="100" required>
-    <button type="submit">Set</button>
-</form>
+        inputForm.addEventListener('submit', function(event) {
+            // Check if the textarea value is empty
+            if (inputTextarea.value.trim() === '') {
+                event.preventDefault(); // Prevent form submission
+                return; // Exit the function
+            }
+        });
 
-<!-- Rest of the HTML code... -->
+        inputTextarea.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
 
-<footer>
-    <div class="footer-text">
-        Developed by :- Jathin Rahul Sarath |
-        <a href="https://github.com/Rahul-INX/text-sentiment-analysis">GitHub</a> |
-    </div>
-</footer>
-
+        setButton.addEventListener('click', function () {
+            var thresholdValue = thresholdInput.value;
+            localStorage.setItem('thresholdValue', thresholdValue);
+        });
+    </script>
 </body>
 </html>

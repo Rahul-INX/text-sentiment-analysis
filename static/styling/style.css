@@ -1,130 +1,159 @@
-/* Heading */
-h1 {
-    color: #555;
-    text-align: center;
-    font-size: 36px;
-}
-
-/* Emotion and Warning */
-.emoji {
-    font-size: 36px;
-    margin-left: 5px;
-}
-
-.warning {
-    font-size: 48px;
-    color: #ff4d4d;
-    text-align: center;
-    font-weight: bold;
-    animation: breathing 4s infinite;
-    display: inline-block;
-    background-color: #ffd2d2;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
-}
-
-@keyframes breathing {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
-    }
-    50% {
-        transform: scale(1.1);
-        box-shadow: 0 0 20px rgba(255, 77, 77, 0.7);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
-    }
-}
-
-/* Color Scheme */
+/* General Styles */
 body {
-    background-color: #f5f5f5;
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 20px;
+  color: #333;
 }
 
-h1, th, td {
-    color: #333;
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-table {
-    background-color: #fff;
+h2 {
+  margin-top: 40px;
 }
 
-button[type="submit"] {
-    background-color: #555;
-    color: #fff;
+h3 {
+  margin-top: 20px;
 }
 
-.clear-btn button {
-    background-color: #ff6666;
-    color: #fff;
+ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-top: 10px;
 }
 
-.threshold-form button {
-    background-color: #555;
-    color: #fff;
+li {
+  margin-bottom: 5px;
 }
 
-.
-.warning {
-    font-size: 48px;
-    color: #ff4d4d;
-    text-align: center;
-    font-weight: bold;
-    background-color: #ffd2d2;
-    padding: 10px 20px;
-    border-radius: 50px;
-    box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
-    animation: pulse 2s infinite;
+form {
+  margin-bottom: 20px;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 40px rgba(255, 77, 77, 0.7);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
-    }
+input[type="submit"] {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-
-
-
-input[type="text"], button[type="submit"] {
-    padding: 12px;
-    font-size: 18px;
+textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-footer {
-    background-color: #333;
-    padding: 20px;
-    text-align: center;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: bold;
+/* Result History Table */
+.result-textarea {
+  width: 100%;
+  height: 300px;
+  resize: vertical;
+  overflow-y: auto;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.result-table th,
+.result-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Confidence Levels */
+.low-confidence {
+  color: red;
+}
+
+.medium-confidence {
+  color: orange;
+}
+
+.high-confidence {
+  color: green;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .result-textarea {
+    height: 200px;
+  }
+
+  .result-table th,
+  .result-table td {
+    padding: 5px;
+  }
+}
+
+/* Additional Aesthetic Styles */
+.result-table th {
+  background-color: #f2f2f2;
+}
+
+.result-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #888;
 }
 
 .footer-text {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .footer-text a {
-    color: #0008ff;
-    text-decoration: underline;
+  color: #888;
+  text-decoration: none;
 }
 
-.footer-text a:hover {
-    text-decoration: underline;
+/* Adjustments for Mobile */
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+
+  ul {
+    padding-left: 15px;
+  }
+
+  .result-textarea {
+    height: auto; /* Increase the height for mobile devices */
+  }
+
+  .result-table th,
+  .result-table td {
+    padding: 3px;
+  }
+
+  input[type="submit"] {
+    padding: 8px;
+  }
 }
+
