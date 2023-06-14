@@ -6,15 +6,11 @@ import json
 import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session
-from flask_session import Session
 import random
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
-# Configure session storage
-app.config['SESSION_TYPE'] = 'filesystem'
-Session(app)
 
 # Load the tokenizer
 with open('tokenizer.pkl', 'rb') as f:

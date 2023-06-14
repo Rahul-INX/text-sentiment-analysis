@@ -62,6 +62,9 @@
 
         .clear-button {
             background-color: red;
+            border-radius: 50%;
+            margin-left:10px ;
+            padding : 20px;
         }
 
         .submit-button {
@@ -100,7 +103,7 @@
     </style>
 </head>
 <body>
-    <h1>Emotion Detection</h1>
+    <h1 style="margin-top: 0px; margin-bottom: 5px;">Emotion Detection</h1>
 
     <form id="input-form" method="POST" action="/">
         <div class="input-container">
@@ -133,7 +136,7 @@
     </ul>
     {% endif %}
 
-    <h2>Result History</h2>
+    <h2 style="margin: 1px;">Result History</h2>
     <div class="result-textarea">
         <table class="result-table">
             <thead>
