@@ -33,10 +33,26 @@ li {
 form {
   margin-bottom: 20px;
 }
+.submit1 {
+  width: 49.5%;
+}
+
+.random1{
+  width: 90%;
+  margin-left: 5px;
+
+}
+.submit-button,
+.random-button {
+  width: 100%;
+  height: 100%;
+}
+
+
 
 input[type="submit"] {
   display: block;
-  width: 100%;
+  /* width: 100.5 */
   padding: 10px;
   background-color: #4caf50;
   color: #fff;
@@ -106,18 +122,28 @@ textarea {
 }
 
 .footer {
-  margin-top: 20px;
-  text-align: center;
   font-size: 14px;
-  color: #888;
+  color: black;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #4e4e4e;
+  padding: 10px;
 }
 
 .footer-text {
   margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+ color: white;
 }
 
 .footer-text a {
-  color: #888;
+  color: white;
   text-decoration: none;
 }
 
@@ -128,6 +154,7 @@ textarea {
   padding: 5px 10px;
   cursor: pointer;
   border-radius: 5px; /* Add border-radius property */
+  
 }
 
 
@@ -138,21 +165,7 @@ textarea {
     padding: 10px;
   }
 
-  h1 {
-    font-size: 24px;
-  }
-
-  h2 {
-    font-size: 20px;
-  }
-
-  h3 {
-    font-size: 16px;
-  }
-
-  ul {
-    padding-left: 15px;
-  }
+ 
 
   .result-textarea {
     height: auto; /* Increase the height for mobile devices */
@@ -168,3 +181,211 @@ textarea {
   }
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip .tooltip-icon {
+  margin-left: 1px;
+  color: #999;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  background-color: #535353;
+  color: white;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  left: 180px;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.tooltip .tooltip-text:before {
+  content: "";
+  position: absolute;
+  bottom: -10px; /* Adjust the distance between the beak and the tooltip */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.result-textarea {
+  width: 100%;
+  height: 300px;
+  resize: vertical;
+  overflow-y: auto;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.result-table th,
+.result-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.low-confidence {
+  color: red;
+}
+
+.medium-confidence {
+  color: orange;
+}
+
+.high-confidence {
+  color: green;
+}
+
+/* Responsive Styles */
+@media (max-width: 1080px) {
+
+  .result-table th,
+  .result-table td {
+      padding: 5px;
+  }
+}
+
+/* Added CSS */
+.clear-button,
+.submit-button,
+.random-button,
+.set-button {
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded edges */
+  transition: transform 0.3s, box-shadow 0.3s; /* Add transition effect */
+}
+
+.clear-button {
+  background-color: red;
+  border-radius: 50%;
+  margin-left:10px ;
+  padding : 20px;
+}
+
+.submit-button {
+  background-color: #4CAF50;
+}
+
+.random-button {
+  background-color: #2196F3;
+  /* width: 49.5%; */
+}
+
+.set-button {
+  background-color: #9C27B0;
+}
+
+.clear-button:focus,
+.submit-button:focus,
+.random-button:focus,
+.set-button:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Add box shadow on focus */
+}
+
+/* Animate on keypress */
+.clear-button:active,
+.submit-button:active,
+.random-button:active,
+.set-button:active {
+  transform: translateY(2px); /* Move button slightly downwards on active state */
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+}
+
+.Hover{
+  color:white
+}
+.Hover:hover{
+  color: #2196F3;
+  font-weight: bold;
+}
+.subran{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.submit1{
+  /* width: 49.5%; */
+}
+.random1{
+/* width: 49.5%; */
+} 
+
+
+
+.clear-history-form {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.result-textarea {
+  width: 100%;
+  overflow-y: auto;
+  margin-bottom: 20px; /* Adjust the margin as per your preference */
+}
+
+
+
+
+.main-content {
+  height: calc(100vh - 240px); /* Adjust the height based on your footer's height and other elements */
+  overflow-y: auto;
+  margin-bottom: 20px; /* Adjust the margin as per your preference */
+}
+
+@media (max-height: 768px) {
+  .main-content {
+    height: calc(100vh - 200px); /* Adjust the height for smaller screens */
+  }
+}
+
+@media (max-height: 480px) {
+  .main-content {
+    height: calc(100vh - 160px); /* Adjust the height for even smaller screens */
+  }
+}
+
+@media (max-height: 1080px) {
+  .main-content {
+    height: calc(100vh - 320px); /* Adjust the height for 1080px screens */
+  }
+}
+
+@media (max-height: 2400px) {
+  .main-content {
+    height: calc(100vh - 485px); /* Adjust the height for 1080px screens */
+  }
+
+  .input-textarea{
+    height : 100px;
+  }
+}

@@ -3,104 +3,6 @@
 <head>
     <title>Emotion Detection</title>
     <link rel="stylesheet" href="static\styling\style.css">
-    <style>
-        .result-textarea {
-            width: 100%;
-            height: 300px;
-            resize: vertical;
-            overflow-y: auto;
-        }
-
-        .result-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .result-table th,
-        .result-table td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .low-confidence {
-            color: red;
-        }
-
-        .medium-confidence {
-            color: orange;
-        }
-
-        .high-confidence {
-            color: green;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .result-textarea {
-                height: 200px;
-            }
-
-            .result-table th,
-            .result-table td {
-                padding: 5px;
-            }
-        }
-        
-        /* Added CSS */
-        .clear-button,
-        .submit-button,
-        .random-button,
-        .set-button {
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 5px; /* Rounded edges */
-            transition: transform 0.3s, box-shadow 0.3s; /* Add transition effect */
-        }
-
-        .clear-button {
-            background-color: red;
-            border-radius: 50%;
-            margin-left:10px ;
-            padding : 20px;
-        }
-
-        .submit-button {
-            background-color: #4CAF50;
-        }
-
-        .random-button {
-            background-color: #2196F3;
-        }
-
-        .set-button {
-            background-color: #9C27B0;
-        }
-
-        .clear-button:focus,
-        .submit-button:focus,
-        .random-button:focus,
-        .set-button:focus {
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Add box shadow on focus */
-        }
-
-        /* Animate on keypress */
-        .clear-button:active,
-        .submit-button:active,
-        .random-button:active,
-        .set-button:active {
-            transform: translateY(2px); /* Move button slightly downwards on active state */
-        }
-        
-        .input-container {
-            display: flex;
-            align-items: center;
-        }
-
-    </style>
 </head>
 <body>
     <h1 style="margin-top: 0px; margin-bottom: 5px;">Emotion Detection</h1>
@@ -110,23 +12,28 @@
             <textarea name="text" id="input-textarea" style="width: 100%; resize: none;" required placeholder="Enter your text here">{{ random_string }}</textarea>
             <button type="button" class="clear-button" onclick="clearInputTextarea()">Clear</button>
         </div>
-        <input type="submit" class="submit-button" value="Submit" style="width: 100%; margin-top: 10px;">
+        <div class="subran">
+            <form class="submit1">
+                <input type="submit" class="submit-button" value="Submit">
+            </form>
+            <form method="POST" action="/random" class="random1">
+                <input type="submit" class="random-button random1" value="Random">
+            </form>
+        </div>
     </form>
-
-    <form method="POST" action="/random">
-        <input type="submit" class="random-button" value="Random">
-    </form>
-
+    <div class="subran">
+        
+    </div>
     <form id="input-form" method="POST" action="/set_threshold">
         <div style="display: flex; align-items: center;">
-            <label for="threshold" style="margin-right: 5px;">Inference Threshold :</label>
+            <div class="tooltip">
+                <label for="threshold" style="margin-right: 5px;">Inference Threshold<span class="tooltip-icon">&#9432;</span> :&nbsp;</label>
+                <span class="tooltip-text">This is the minimum confidence level for inferred emotions.</span>
+            </div>
             <input type="number" name="threshold" id="threshold" step="0.01" min="0" max="1" value="{{ threshold }}" style="margin-right: 5px;">
             <button type="submit" class="set-button">Set</button>
         </div>
     </form>
-
-    
-
     {% if inferred_emotions %}
     <h3>Inferred Emotions:</h3>
     <ul>
@@ -137,7 +44,7 @@
     {% endif %}
 
     <h2 style="margin: 1px;">Result History</h2>
-    <div class="result-textarea">
+    <div class="result-textarea main-content"> <!-- Added the .main-content class -->
         <table class="result-table">
             <thead>
                 <tr>
@@ -177,17 +84,19 @@
             </tbody>
         </table>
     </div>
-
-    <form method="POST" action="/clear">
-        <input type="submit" value="Clear History">
-    </form>
-
     <footer class="footer">
+        <form method="POST" action="/clear" class="clear-history-form">
+            <input type="submit" value="Clear History">
+        </form>
         <div class="footer-text">
-            Developed by: Jathin Rahul Sarath |
-            <a href="https://github.com/Rahul-INX/text-sentiment-analysis">GitHub</a>
+            Developed by : 
+             <a href="www.linkedin.com/in/jathin-muppala-474ab5220" class="Hover">&nbsp;Jathin&nbsp;</a>
+             <a href="https://www.linkedin.com/in/rahul-harivansh-fatyal/" class="Hover">Rahul&nbsp;</a> 
+             <a href="" class="Hover">Sarath</a>&nbsp; |&nbsp;
+            <a href="https://github.com/Rahul-INX/text-sentiment-analysis" class="Hover"> GitHub</a>
         </div>
     </footer>
+
 
     <script>
         var inputForm = document.getElementById('input-form');
