@@ -7,27 +7,126 @@ import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session
 import random
+from nltk.corpus import stopwords
+import string
+import nltk
+from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
+import spacy
+import re
+from spellchecker import SpellChecker
+from nltk.tokenize import word_tokenize
+
+
+
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('punkt')
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
-
 # Load the tokenizer
 with open('tokenizer.pkl', 'rb') as f:
     tokenizer = pickle.load(f)
+
 threshold = 0.5
 
 # Load the emotion trained model
 model = tf.keras.models.load_model('emotion_model_trained.h5')
 
+# Load stop words
+stop_words = set(stopwords.words('english'))
+
+# Initialize lemmatizer and stemmer
+lemmatizer = WordNetLemmatizer()
+stemmer = PorterStemmer()
+
+# Initialize spaCy for lemmatization
+nlp = spacy.load('en_core_web_sm')
+
+# Initialize spell checker
+spell = SpellChecker()
+
+# Preprocess the text by removing stop words, punctuation, handling emojis and emoticons, lemmatization, handling repeated characters, and spell correction
 def preprocess_text(text):
+    # Replace comma, inverted commas, "the", "and", full stop, and exclamation mark
+    text = text.replace(',', '')
+    text = text.replace('\'', '')
+    text = text.replace('\"', '')
+    text = text.replace('the ', '')
+    text = text.replace('and ', '')
+    text = text.replace('. ', '')
+    text = text.replace('!', '')
+    text = text.replace("can't", "cannot")
+    text = text.replace("don't", "do not")
+    text = text.replace("I'm", "I am")
+    text = text.replace("it's", "it is")
+    text = text.replace("I've", "I have")
+    text = text.replace("isn't", "is not")
+    text = text.replace("won't", "will not")
+    text = text.replace("doesn't", "does not")
+    text = text.replace("they're", "they are")
+    text = text.replace("haven't", "have not")
+    text = text.replace("shouldn't", "should not")
+    text = text.replace("wouldn't", "would not")
+    text = text.replace("wasn't", "was not")
+    text = text.replace("weren't", "were not")
+    text = text.replace("hasn't", "has not")
+    text = text.replace("couldn't", "could not")
+    text = text.replace("aren't", "are not")
+    text = text.replace("didn't", "did not")
+    text = text.replace("doesn't", "does not")
+    text = text.replace("mustn't", "must not")
+    text = text.replace("shan't", "shall not")
+    text = text.replace("mightn't", "might not")
+    text = text.replace("she's", "she is")
+    text = text.replace("he's", "he is")
+    text = text.replace("we're", "we are")
+    text = text.replace("you're", "you are")
+    text = text.replace("let's", "let us")
+    text = text.replace("that's", "that is")
+
+
+    # Convert to lowercase
+    text = text.lower()
+
     # Tokenize the text
-    sequence = tokenizer.texts_to_sequences([text])
+    sequence = word_tokenize(text)
+
+    # Lemmatization or stemming
+    lemmatized_sequence = [lemmatizer.lemmatize(word) for word in sequence]
+
+    # Handling repeated characters
+    processed_sequence = []
+    for word in lemmatized_sequence:
+        processed_sequence.append(re.sub(r'(.)\1+', r'\1\1', word))
+
+    # Spell correction
+    corrected_sequence = [spell.correction(word) for word in processed_sequence if isinstance(word, str)]
+
+    # Removing special characters
+    special_chars = string.punctuation
+    processed_sequence = [word for word in corrected_sequence if word and word not in special_chars]
+
+    # Convert words to indices using tokenizer
+    indexed_sequence = tokenizer.texts_to_sequences([processed_sequence])[0]
 
     # Pad the sequence
-    padded_sequence = pad_sequences(sequence, truncating='post', maxlen=50, padding='post')
+    padded_sequence = pad_sequences([indexed_sequence], truncating='post', maxlen=50, padding='post')
 
     return padded_sequence
+
+
+
+
+
+
+
+
+
+
+
 
 def predict_emotion(text):
     # Preprocess the text
