@@ -44,16 +44,18 @@
     {% endif %}
 
     <h2 style="margin: 1px;">Result History</h2>
-    <div class="result-textarea main-content"> <!-- Added the .main-content class -->
+    <div class="table-container" style="overflow-y: auto; max-height: calc(100vh - 350px);"> <!-- Adjust the height calculation as needed -->
         <table class="result-table">
             <thead>
-                <tr>
-                    <th>Text</th>
-                    <th>Emotion &amp; Probs</th>
-                    <th>Inferred Emotions</th>
-                    <th>Confidence</th>
-                    <th>Timestamp</th>
-                </tr>
+                <div >
+                    <tr>
+                        <th>Text</th>
+                        <th>Emotion &amp; Probs</th>
+                        <th>Inferred Emotions</th>
+                        <th>Confidence</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </div>
             </thead>
             <tbody>
                 {% for entry in history %}
@@ -84,8 +86,9 @@
             </tbody>
         </table>
     </div>
-    <footer class="footer">
-        <form method="POST" action="/clear" class="clear-history-form">
+    
+    <footer class="footer" style="padding: 0px;">
+        <form method="POST" action="/clear" class="clear-history-form" style="margin-bottom: 0px; margin-top: 5px;">
             <input type="submit" value="Clear History">
         </form>
         <div class="footer-text">

@@ -353,14 +353,48 @@ textarea {
   margin-bottom: 20px; /* Adjust the margin as per your preference */
 }
 
-
-
-
 .main-content {
   height: calc(100vh - 240px); /* Adjust the height based on your footer's height and other elements */
   overflow-y: auto;
   margin-bottom: 20px; /* Adjust the margin as per your preference */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @media (max-height: 768px) {
   .main-content {
@@ -377,15 +411,5 @@ textarea {
 @media (max-height: 1080px) {
   .main-content {
     height: calc(100vh - 320px); /* Adjust the height for 1080px screens */
-  }
-}
-
-@media (max-height: 2400px) {
-  .main-content {
-    height: calc(100vh - 485px); /* Adjust the height for 1080px screens */
-  }
-
-  .input-textarea{
-    height : 100px;
   }
 }
