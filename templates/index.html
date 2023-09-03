@@ -34,6 +34,7 @@
             <button type="submit" class="set-button">Set</button>
         </div>
     </form>
+    
     {% if inferred_emotions %}
     <h3>Inferred Emotions:</h3>
     <ul>
@@ -47,27 +48,28 @@
     <div class="table-container" style="overflow-y: auto; max-height: calc(100vh - 350px);"> <!-- Adjust the height calculation as needed -->
         <table class="result-table">
             <thead>
-                <div >
-                    <tr>
-                        <th>Text</th>
-                        <th>Emotion &amp; Probs</th>
-                        <th>Inferred Emotions</th>
-                        <th>Confidence</th>
-                        <th>Timestamp</th>
-                    </tr>
-                </div>
+                <tr>
+                    <th>Text</th>
+                    <th>Emotion &amp; Probs</th>
+                    <th>Inferred Emotions</th>
+                    <th>Confidence</th>
+                    <th>Timestamp</th>
+                </tr>
             </thead>
             <tbody>
                 {% for entry in history %}
                 <tr>
                     <td>{{ entry['text'] }}</td>
                     <td>
+                        {% set sorted_probs = entry['probabilities']|sort(reverse=true) %}
                         {% for i in range(3) %}
-                        {% set emotion = entry['emotions'][i] %}
-                        {% set probability = entry['probabilities'][i] %}
-                        {{ emotion }}: {{ '%.3f' % probability }}{% if not loop.last %}, {% endif %}
+                        {% set max_prob = sorted_probs[i] %}
+                        {% set emotion_index = entry['probabilities'].index(max_prob) %}
+                        {% set emotion = entry['emotions'][emotion_index] %}
+                        {{ emotion }}: {{ '%.3f' % max_prob }}{% if not loop.last and i < 2 %}, {% endif %}
                         {% endfor %}
                     </td>
+                    
                     <td>
                         {% for inferred_emotion in entry['inferred_emotions'] %}
                         {{ inferred_emotion }}{% if not loop.last %}, {% endif %}
@@ -85,6 +87,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        
     </div>
     
     <footer class="footer" style="padding: 0px;">

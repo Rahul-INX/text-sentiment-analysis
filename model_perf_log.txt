@@ -1,0 +1,58 @@
+Timestamp: 2023-09-02 22:52:35
+Model Architecture:
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ embedding (Embedding)       (None, 50, 16)            160000    
+                                                                 
+ bidirectional (Bidirection  (None, 50, 40)            5920      
+ al)                                                             
+                                                                 
+ dropout (Dropout)           (None, 50, 40)            0         
+                                                                 
+ bidirectional_1 (Bidirecti  (None, 40)                9760      
+ onal)                                                           
+                                                                 
+ dropout_1 (Dropout)         (None, 40)                0         
+                                                                 
+ dense (Dense)               (None, 6)                 246       
+                                                                 
+=================================================================
+Total params: 175926 (687.21 KB)
+Trainable params: 175926 (687.21 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+Model Performance:
+Max Validation Accuracy: 0.3376
+Min Validation Loss: 1.5750
+Final Validation Accuracy: 0.3376
+Final Validation Loss: 1.5750
+
+Timestamp: 2023-09-03 00:38:07
+Model Architecture:
+Model: "sequential_1"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ embedding_1 (Embedding)     (None, 50, 16)            160000    
+                                                                 
+ bidirectional_2 (Bidirecti  (None, 50, 40)            5920      
+ onal)                                                           
+                                                                 
+ bidirectional_3 (Bidirecti  (None, 40)                9760      
+ onal)                                                           
+                                                                 
+ dense_1 (Dense)             (None, 6)                 246       
+                                                                 
+=================================================================
+Total params: 175926 (687.21 KB)
+Trainable params: 175926 (687.21 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+Model Performance:
+Max Validation Accuracy: 0.9374
+Min Validation Loss: 0.0970
+Final Validation Accuracy: 0.9354
+Final Validation Loss: 0.1055
+

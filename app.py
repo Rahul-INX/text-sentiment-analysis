@@ -1,292 +1,191 @@
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-import pickle
-import numpy as np
+from flask import Flask, render_template, request, redirect, jsonify
 import tensorflow as tf
-import json
-import os
-from datetime import datetime
-from flask import Flask, render_template, request, redirect, session
-import random
-from nltk.corpus import stopwords
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 import string
-import nltk
-from nltk.stem import WordNetLemmatizer
-from nltk.stem import PorterStemmer
-import spacy
-import re
-from spellchecker import SpellChecker
-from nltk.tokenize import word_tokenize
-
-
-
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('punkt')
+import pickle
+import random
+import json
+from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
-# Load the tokenizer
+# Load the trained model and tokenizer
+model = tf.keras.models.load_model('best_model.h5')
 with open('tokenizer.pkl', 'rb') as f:
     tokenizer = pickle.load(f)
 
+# Set the inference threshold (initial value)
 threshold = 0.5
 
-# Load the emotion trained model
-model = tf.keras.models.load_model('emotion_model_trained.h5')
+# Define complex emotions based on rules
+complex_emotions = {
+    ('joy', 'love'): 'bliss',
+    ('surprise', 'love'): 'affection',
+    ('surprise', 'joy'): 'elation',
+    ('sadness', 'joy'): 'nostalgia',
+    ('sadness', 'love'): 'melancholy',
+    ('fear', 'joy'): 'excitement',
+    ('fear', 'love'): 'longing',
+    ('anger', 'joy'): 'exasperation',
+    ('anger', 'love'): 'passion',
+    ('sadness', 'surprise', 'love'): 'bittersweet',
+    ('sadness', 'surprise'): 'disappointment',
+    ('anger', 'surprise'): 'outrage',
+    ('fear', 'surprise'): 'anxiety',
+    ('surprise',): 'surprise',
+    ('anger', 'sadness'): 'resentment',
+    ('anger', 'fear', 'sadness'): 'resigned',
+    ('anger', 'fear'): 'frustration',
+    ('sadness', 'fear'): 'despair',
+    ('fear',): 'fear',
+    ('sadness',): 'sadness',
+    ('anger',): 'anger',
+    ('joy',): 'joy',
+    ('love',): 'love',
+    ('joy', 'surprise', 'love'): 'delight',
+    ('anger', 'surprise', 'joy'): 'indignation',
+    ('fear', 'sadness', 'joy'): 'admiration',
+    ('fear', 'sadness', 'love'): 'sorrow',
+    ('anger', 'fear', 'joy'): 'outrage',
+    ('anger', 'fear', 'love'): 'rage',
+    ('surprise', 'sadness', 'fear'): 'awe',
+    ('surprise', 'sadness', 'love'): 'amazement',
+    ('surprise', 'sadness', 'joy'): 'amusement',
+    ('fear', 'surprise', 'love'): 'trepidation',
+    ('anger', 'sadness', 'love'): 'heartache',
+    ('anger', 'surprise', 'sadness'): 'fury',
+    ('anger', 'surprise', 'fear'): 'hostility',
+    ('sadness', 'fear', 'love'): 'grief',
+    ('sadness', 'surprise', 'joy'): 'regret',
+    ('sadness', 'surprise', 'fear'): 'pity',
+    ('sadness', 'joy', 'love'): 'yearning',
+    ('anger', 'joy', 'love'): 'zeal',
+}
 
-# Load stop words
-stop_words = set(stopwords.words('english'))
+# Initialize an empty list to store the result history
+history = []
 
-# Initialize lemmatizer and stemmer
-lemmatizer = WordNetLemmatizer()
-stemmer = PorterStemmer()
-
-# Initialize spaCy for lemmatization
-nlp = spacy.load('en_core_web_sm')
-
-# Initialize spell checker
-spell = SpellChecker()
-
-# Preprocess the text by removing stop words, punctuation, handling emojis and emoticons, lemmatization, handling repeated characters, and spell correction
+# Function to preprocess text (remove punctuations and convert to lowercase)
 def preprocess_text(text):
-    # Replace comma, inverted commas, "the", "and", full stop, and exclamation mark
-    text = text.replace(',', '')
-    text = text.replace('\'', '')
-    text = text.replace('\"', '')
-    text = text.replace('the ', '')
-    text = text.replace('and ', '')
-    text = text.replace('. ', '')
-    text = text.replace('!', '')
-    text = text.replace("can't", "cannot")
-    text = text.replace("don't", "do not")
-    text = text.replace("I'm", "I am")
-    text = text.replace("it's", "it is")
-    text = text.replace("I've", "I have")
-    text = text.replace("isn't", "is not")
-    text = text.replace("won't", "will not")
-    text = text.replace("doesn't", "does not")
-    text = text.replace("they're", "they are")
-    text = text.replace("haven't", "have not")
-    text = text.replace("shouldn't", "should not")
-    text = text.replace("wouldn't", "would not")
-    text = text.replace("wasn't", "was not")
-    text = text.replace("weren't", "were not")
-    text = text.replace("hasn't", "has not")
-    text = text.replace("couldn't", "could not")
-    text = text.replace("aren't", "are not")
-    text = text.replace("didn't", "did not")
-    text = text.replace("doesn't", "does not")
-    text = text.replace("mustn't", "must not")
-    text = text.replace("shan't", "shall not")
-    text = text.replace("mightn't", "might not")
-    text = text.replace("she's", "she is")
-    text = text.replace("he's", "he is")
-    text = text.replace("we're", "we are")
-    text = text.replace("you're", "you are")
-    text = text.replace("let's", "let us")
-    text = text.replace("that's", "that is")
-
-
+    # Remove punctuation
+    translator = str.maketrans('', '', string.punctuation)
+    text = text.translate(translator)
+    
     # Convert to lowercase
     text = text.lower()
+    
+    return text
 
-    # Tokenize the text
-    sequence = word_tokenize(text)
-
-    # Lemmatization or stemming
-    lemmatized_sequence = [lemmatizer.lemmatize(word) for word in sequence]
-
-    # Handling repeated characters
-    processed_sequence = []
-    for word in lemmatized_sequence:
-        processed_sequence.append(re.sub(r'(.)\1+', r'\1\1', word))
-
-    # Spell correction
-    corrected_sequence = [spell.correction(word) for word in processed_sequence if isinstance(word, str)]
-
-    # Removing special characters
-    special_chars = string.punctuation
-    processed_sequence = [word for word in corrected_sequence if word and word not in special_chars]
-
-    # Convert words to indices using tokenizer
-    indexed_sequence = tokenizer.texts_to_sequences([processed_sequence])[0]
-
-    # Pad the sequence
-    padded_sequence = pad_sequences([indexed_sequence], truncating='post', maxlen=50, padding='post')
-
-    return padded_sequence
-
-
-
-
-
-
-
-
-
-
-
-
-def predict_emotion(text):
-    # Preprocess the text
-    processed_text = preprocess_text(text)
-
-    # Predict the emotion probabilities
-    predicted_probs = model.predict(processed_text)[0]
-
-    # Get the indices of the top 3 probabilities in descending order
-    top_indices = np.argsort(predicted_probs)[::-1][:3]
-
-    # Map the indices to the corresponding emotions and probabilities
+# Function to calculate complex emotions based on rules and probabilities
+def calculate_complex_emotion(probabilities):
+    # Create a set of emotions that exceed the threshold
+    exceeded_threshold = set()
     emotions = ['anger', 'fear', 'sadness', 'surprise', 'joy', 'love']
-    top_emotions = [emotions[idx] for idx in top_indices]
-    top_probabilities = [float(predicted_probs[idx]) for idx in top_indices]  # Convert to float
 
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get the current timestamp
+    for i, prob in enumerate(probabilities):
+        if prob > threshold:
+            exceeded_threshold.add(emotions[i])
 
-    return top_emotions, top_probabilities, timestamp  # Return emotions, probabilities, and timestamp
+    # Check if any complex emotion rules match the exceeded emotions
+    for rule_emotions, complex_emotion in complex_emotions.items():
+        if set(rule_emotions).issubset(exceeded_threshold):
+            return complex_emotion
 
-random_string = ""
+    return None  # If no complex emotion rule matches, return None
 
-def save_history(history):
-    with open('history.json', 'w') as f:
-        json.dump(history, f)
+# Function to predict emotion from text
+def predict_emotion(text):
+    # Preprocess the input text
+    text = preprocess_text(text)
 
-def load_history():
-    if not os.path.exists('history.json'):
-        with open('history.json', 'w') as f:
-            f.write("[]")  # Write an empty list to the file
-        return []  # Return an empty list as the history
+    # Tokenize and pad the input text
+    text_sequence = tokenizer.texts_to_sequences([text])
+    padded_sequence = pad_sequences(text_sequence, maxlen=50, padding='post', truncating='post')
 
-    try:
-        with open('history.json', 'r') as f:
-            history = json.load(f)
-    except:
-        history = []
-    return history
+    # Perform emotion inference
+    probabilities = model.predict(padded_sequence)
 
-def predict_inferred_emotions(emotions, probabilities, threshold):
-    inferred_emotions = []
+    # Calculate the complex emotion based on the rules and probabilities
+    complex_emotion = calculate_complex_emotion(probabilities[0])
 
-    # Define the rules for inferring emotions based on the given emotions
-    rules = [
-    (('joy', 'love'), 'bliss'),
-    (('surprise', 'love'), 'affection'),
-    (('surprise', 'joy'), 'elation'),
-    (('sadness', 'joy'), 'nostalgia'),
-    (('sadness', 'love'), 'melancholy'),
-    (('fear', 'joy'), 'excitement'),
-    (('fear', 'love'), 'longing'),
-    (('anger', 'joy'), 'exasperation'),
-    (('anger', 'love'), 'passion'),
-    (('sadness', 'surprise', 'love'), 'bittersweet'),
-    (('sadness', 'surprise'), 'disappointment'),
-    (('anger', 'surprise'), 'outrage'),
-    (('fear', 'surprise'), 'anxiety'),
-    (('surprise',), 'surprise'),
-    (('anger', 'sadness'), 'resentment'),
-    (('anger', 'fear', 'sadness'), 'resigned'),
-    (('anger', 'fear'), 'frustration'),
-    (('sadness', 'fear'), 'despair'),
-    (('fear',), 'fear'),
-    (('sadness',), 'sadness'),
-    (('anger',), 'anger'),
-    (('joy',), 'joy'),
-    (('love',), 'love'),
-    (('joy', 'surprise', 'love'), 'delight'),
-    (('anger', 'surprise', 'joy'), 'indignation'),
-    (('fear', 'sadness', 'joy'), 'admiration'),
-    (('fear', 'sadness', 'love'), 'sorrow'),
-    (('anger', 'fear', 'joy'), 'outrage'),
-    (('anger', 'fear', 'love'), 'rage'),
-    (('surprise', 'sadness', 'fear'), 'awe'),
-    (('surprise', 'sadness', 'love'), 'amazement'),
-    (('surprise', 'sadness', 'joy'), 'amusement'),
-    (('fear', 'surprise', 'love'), 'trepidation'),
-    (('anger', 'sadness', 'love'), 'heartache'),
-    (('anger', 'surprise', 'sadness'), 'fury'),
-    (('anger', 'surprise', 'fear'), 'hostility'),
-    (('sadness', 'fear', 'love'), 'grief'),
-    (('sadness', 'surprise', 'joy'), 'regret'),
-    (('sadness', 'surprise', 'fear'), 'pity'),
-    (('sadness', 'joy', 'love'), 'yearning'),
-    (('anger', 'joy', 'love'), 'zeal')
-    ]
+    # Return the complex emotion and probabilities
+    return complex_emotion, probabilities[0]
 
+# Route for the home page
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    global history  # Declare history as a global variable
+    random_string = ""  # You can set a random string here if needed
 
-    filtered_emotions = []
+    # Load history from the JSON file
+    load_history()
 
-    # Filter emotions based on probability threshold
-    for i in range(len(emotions)):
-        if probabilities[i] >= threshold:
-            filtered_emotions.append(emotions[i])
+    if request.method == 'POST':
+        user_text = request.form['text']
+        complex_emotion, probabilities = predict_emotion(user_text)
 
-    # Check if any of the defined rules match the filtered emotions
-    for rule_emotions, inferred_emotion in rules:
-        if all(emotion in filtered_emotions for emotion in rule_emotions):
-            inferred_emotions.append(inferred_emotion)
+        # Create a timestamp for the current prediction
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Remove atomic emotions from inferred emotions if its size is greater than 3
-    if len(inferred_emotions) > 3:
-        inferred_emotions = [emotion for emotion in inferred_emotions if emotion not in ('anger', 'fear', 'sadness', 'surprise', 'joy', 'love')]
-    print("THRESHOLD:", threshold)
-    print("FILTERED EMOTION:", filtered_emotions)
-    print("INFERRED EMOTION:", inferred_emotions)
-    return inferred_emotions
+        # Add the current prediction to the history list
+        history.append({
+            'text': user_text,
+            'emotions': ['anger', 'fear', 'sadness', 'surprise', 'joy', 'love'],  # Define your emotions here
+            'probabilities': probabilities.tolist(),
+            'inferred_emotion': complex_emotion,
+            'timestamp': timestamp
+        })
 
-def get_random_string():
+        # Sort the updated history by timestamp
+        history = sort_history_by_timestamp(history)
+
+        # Save the updated history to a JSON file
+        save_history()
+
+    return render_template('index.html', random_string=random_string, threshold=threshold, history=history)
+
+# Route to generate a random string from "test_text.txt" and update the textarea
+@app.route('/random', methods=['POST'])
+def random_text():
     with open('test_text.txt', 'r') as file:
         lines = file.readlines()
         random_string = random.choice(lines).strip()
-        return random_string
 
+    return render_template('index.html', random_string=random_string, threshold=threshold, history=history)
 
-history = load_history()
+# Route to set the inference threshold
+@app.route('/set_threshold', methods=['POST'])
+def set_threshold():
+    global threshold  # Make sure "threshold" is a global variable
+    new_threshold = float(request.form['threshold'])  # Assuming you're sending the threshold value from a form
+    threshold = new_threshold
+    return redirect('/')  # Redirect back to the home page after setting the threshold
 
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    inferred_emotions = []
-
-    if request.method == 'POST':
-        text = request.form['text']
-        emotions, probabilities, timestamp = predict_emotion(text)
-        inferred_emotions = predict_inferred_emotions(emotions, probabilities, threshold)
-        entry = {
-            'text': text,
-            'emotions': emotions,
-            'probabilities': probabilities,
-            'inferred_emotions': inferred_emotions,
-            'timestamp': timestamp
-        }
-        history.insert(0, entry)
-        save_history(history)
-        return redirect('/')
-        
-    
-    return render_template('index.html', history=history, inferred_emotions=inferred_emotions, threshold=session.get('threshold', 0.5), random_string=random_string)
-
+# Route to clear the history
 @app.route('/clear', methods=['POST'])
 def clear_history():
     history.clear()
-    save_history(history)
+    save_history()
     return redirect('/')
 
-@app.route('/set_threshold', methods=['POST'])
-def set_threshold():
-    global threshold  # Declare the threshold variable as global
-    threshold = float(request.form['threshold'])
-    session['threshold'] = threshold  # Update the threshold value in the session
-    return redirect('/')
+# Function to load history from history.json
+def load_history():
+    global history
+    try:
+        with open('history.json', 'r') as history_file:
+            history = json.load(history_file)
+    except FileNotFoundError:
+        history = []
 
+# Function to save history to history.json
+def save_history():
+    with open('history.json', 'w') as history_file:
+        json.dump(history, history_file, indent=4)
 
-@app.route('/random', methods=['POST'])
-def random_text():
-    global random_string
-    random_string = get_random_string()
-    return redirect('/')
+# Function to sort history by timestamp in descending order
+def sort_history_by_timestamp(history):
+    return sorted(history, key=lambda x: x['timestamp'], reverse=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
-
